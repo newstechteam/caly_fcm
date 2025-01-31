@@ -177,4 +177,5 @@ def send_notification():
 
 # 🔵 Flask 서버 실행
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.getenv("PORT", 5000))  # 환경 변수에서 PORT 값 가져오기, 없으면 5000 사용
+    app.run(debug=True, host="0.0.0.0", port=port)  # 🔴 변경된 부분!
