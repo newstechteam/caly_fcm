@@ -4,6 +4,8 @@ import firebase_admin
 from firebase_admin import credentials, messaging
 from flask import Flask, request, jsonify, render_template_string, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # 🔵 Flask 서버 초기화
 app = Flask(__name__)
@@ -18,13 +20,14 @@ if not firebase_json:
 cred = credentials.Certificate(json.loads(firebase_json))  # 🔥 JSON 직접 로드
 firebase_admin.initialize_app(cred)
 
-# 🔵 사용자 계정 정보 (아이디: NCENTER, 비밀번호: NCENTER)
+# 🔵 사용자 계정 정보 (아이디: NCENTER, 비밀번호: NEWS!1234)
 users = {
-    "NCENTER": generate_password_hash("NCENTER")  # 기본 로그인 계정
+    "NCENTER": generate_password_hash("NEWS!1234")  # 기본 로그인 계정
 }
 
 # 🔵 로그인 페이지
 @app.route("/", methods=["GET", "POST"])
+@Limiter.limit("5 per minute")  # 1분에 5번 이상 로그인 시도 차단
 def login():
     error = None
     if request.method == "POST":
