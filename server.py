@@ -8,12 +8,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # 보안 강화를 위한 세션 키
 
-# 🔵 환경 변수에서 Firebase JSON 불러오기
-SERVICE_ACCOUNT_JSON = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+# 🔵 Firebase 서비스 계정 JSON 파일 (Render Secret Files에서 불러오기)
+SECRET_FILE_PATH = "/opt/render/secrets/firebase.json"
+SERVICE_ACCOUNT_FILE = os.path.abspath(SECRET_FILE_PATH)
 
-# 🔵 Firebase Admin SDK 초기화 (환경 변수에서 JSON 내용 읽기)
+# 🔵 Firebase Admin SDK 초기화 (한 번만 실행)
 if not firebase_admin._apps:
-    cred = credentials.Certificate(eval(SERVICE_ACCOUNT_JSON))
+    cred = credentials.Certificate(SERVICE_ACCOUNT_FILE)
     firebase_admin.initialize_app(cred)
 
 # 🔵 사용자 계정 정보 (아이디: NCENTER, 비밀번호: NCENTER)
@@ -21,7 +22,7 @@ users = {
     "NCENTER": generate_password_hash("NCENTER")  # 기본 로그인 계정
 }
 
-# 🔵 로그인 페이지 (UI 개선 및 크기 조정)
+# 🔵 로그인 페이지
 @app.route("/", methods=["GET", "POST"])
 def login():
     error = None
@@ -51,7 +52,7 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
 
-# 🔵 로그인 HTML (크기 조정 및 디자인 개선)
+# 🔵 로그인 HTML
 login_html = """
 <!DOCTYPE html>
 <html lang="ko">
@@ -62,9 +63,9 @@ login_html = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-container { width: 500px; /* 🔵 기존 400px → 500px 확장 */ background: white; padding: 40px; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1); }
-        .btn-custom { width: 100%; font-size: 20px; padding: 10px; } /* 🔵 버튼 크기 키움 */
-        .form-control { font-size: 18px; padding: 12px; } /* 🔵 입력 필드 크기 키움 */
+        .login-container { width: 500px; background: white; padding: 40px; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1); }
+        .btn-custom { width: 100%; font-size: 20px; padding: 10px; }
+        .form-control { font-size: 18px; padding: 12px; }
         .error-message { color: red; text-align: center; margin-bottom: 15px; }
     </style>
 </head>
@@ -148,7 +149,7 @@ fcm_html = """
 </html>
 """
 
-# 🔵 FCM 알림 전송 함수 (토픽 "all" 구독자에게 전송)
+# 🔵 FCM 알림 전송 함수
 def send_fcm_notification(title, body):
     message = messaging.Message(
         notification=messaging.Notification(title=title, body=body),
