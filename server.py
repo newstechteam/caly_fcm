@@ -22,7 +22,7 @@ firebase_admin.initialize_app(cred)
 
 # 🔵 사용자 계정 정보 (아이디: NCENTER, 비밀번호: NEWS!1234)
 users = {
-    "NCENTER": generate_password_hash("NEWS!1234")  # 기본 로그인 계정
+    "NCENTER": generate_password_hash("NCENTER")  # 기본 로그인 계정
 }
 
 # 🔵 로그인 페이지
