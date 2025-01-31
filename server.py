@@ -1,3 +1,4 @@
+import json
 import os
 import firebase_admin
 from firebase_admin import credentials, messaging
@@ -8,14 +9,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # 보안 강화를 위한 세션 키
 
-# 🔵 Firebase 서비스 계정 JSON 파일 (Render Secret Files에서 불러오기)
-SECRET_FILE_PATH = "/opt/render/secrets/firebase.json"
-SERVICE_ACCOUNT_FILE = os.path.abspath(SECRET_FILE_PATH)
+# 🔵 환경 변수에서 Firebase JSON 로드 (Render Secret Files 사용)
+firebase_json = os.getenv("FIREBASE_CONFIG")  # 환경 변수에서 JSON 불러오기
+if not firebase_json:
+    raise ValueError("❌ 환경 변수 FIREBASE_CONFIG가 설정되지 않았습니다!")
 
-# 🔵 Firebase Admin SDK 초기화 (한 번만 실행)
-if not firebase_admin._apps:
-    cred = credentials.Certificate(SERVICE_ACCOUNT_FILE)
-    firebase_admin.initialize_app(cred)
+# 🔵 Firebase Admin SDK 초기화
+cred = credentials.Certificate(json.loads(firebase_json))  # 🔥 JSON 직접 로드
+firebase_admin.initialize_app(cred)
 
 # 🔵 사용자 계정 정보 (아이디: NCENTER, 비밀번호: NCENTER)
 users = {
